@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.example</groupId>
+	<artifactId>my-java-worker-process</artifactId>
+	<version>1.0</version>
+	<name>my-java-worker-process</name>
+
+	<parent>
+		<groupId>com.example</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<build>
+		<plugins>
+			<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<configuration> 
+				<assembleDirectory>target</assembleDirectory> 
+				<programs>
+					<program>
+						<mainClass>WorkerProcess</mainClass>
+						<name>worker</name>
+					</program>
+					<program>
+						<mainClass>OneOffProcess</mainClass>
+						<name>oneoff</name>
+					</program>
+				</programs>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase><goals><goal>assemble</goal></goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
