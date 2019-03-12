@@ -34,55 +34,90 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.force.api.ApiVersion;
+import com.force.api.ApiConfig;
+import com.force.api.ForceApi;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Controller
 @SpringBootApplication
 public class Main {
 
-  @Value("${spring.datasource.url}")
-  private String dbUrl;
+	@Value("${spring.datasource.url}")
+	private String dbUrl;
 
-  @Autowired
-  private DataSource dataSource;
+	@Autowired
+	private DataSource dataSource;
 
-  public static void main(String[] args) throws Exception {
-    SpringApplication.run(Main.class, args);
-  }
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(Main.class, args);
+	}
 
-  @RequestMapping("/")
-  String index() {
-    return "index";
-  }
+	@RequestMapping("/")
+	String index() {
+		return "index";
+	}
 
-  @RequestMapping("/db")
-  String db(Map<String, Object> model) {
-    try (Connection connection = dataSource.getConnection()) {
-      Statement stmt = connection.createStatement();
-      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timestps (timestp timestamp, id BIGSERIAL PRIMARY KEY)");
-      stmt.executeUpdate("INSERT INTO timestps VALUES (now())");
-      ResultSet rs = stmt.executeQuery("SELECT timestp FROM timestps");
+	@RequestMapping("/db")
+	String db(Map<String, Object> model) {
+		try (Connection connection = dataSource.getConnection()) {
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timestps (timestp timestamp, id BIGSERIAL PRIMARY KEY)");
+			stmt.executeUpdate("INSERT INTO timestps VALUES (now())");
+			ResultSet rs = stmt.executeQuery("SELECT timestp FROM timestps");
 
-      ArrayList<String> output = new ArrayList<String>();
-      while (rs.next()) {
-        output.add("Read from DB: " + rs.getTimestamp("timestp"));
-      }
+			ArrayList<String> output = new ArrayList<String>();
+			while (rs.next()) {
+				output.add("Read from DB: " + rs.getTimestamp("timestp"));
+			}
 
-      model.put("records", output);
-      return "db";
-    } catch (Exception e) {
-      model.put("message", e.getMessage());
-      return "error";
-    }
-  }
+			model.put("records", output);
+			return "db";
+		} catch (Exception e) {
+			model.put("message", e.getMessage());
+			return "error";
+		}
+	}
 
-  @Bean
-  public DataSource dataSource() throws SQLException {
-    if (dbUrl == null || dbUrl.isEmpty()) {
-      return new HikariDataSource();
-    } else {
-      HikariConfig config = new HikariConfig();
-      config.setJdbcUrl(dbUrl);
-      return new HikariDataSource(config);
-    }
-  }
+	@RequestMapping("/platformevents")
+	String platformevents() {
+		ApiConfig config = new ApiConfig().setApiVersion(ApiVersion.V39);
+		config.setUsername(System.getenv("SF_USER"));
+		config.setPassword(System.getenv("SF_PWD"));
+
+		ForceApi api = new ForceApi(config);
+
+		VoteEvent event = new VoteEvent();
+		event.value = 9;
+
+		api.createSObject("aazcona__Vote__e", event);
+		return "platformevents";
+	}
+
+	@Bean
+	public DataSource dataSource() throws SQLException {
+		if (dbUrl == null || dbUrl.isEmpty()) {
+			return new HikariDataSource();
+		} else {
+			HikariConfig config = new HikariConfig();
+			config.setJdbcUrl(dbUrl);
+			return new HikariDataSource(config);
+		}
+	}
+
+	public class VoteEvent {
+
+		@JsonProperty("aazcona__Value__c")
+		Integer value;
+
+		public Integer getValue() {
+			return value;
+		}
+
+		public void setValue(Integer value) {
+			this.value = value;
+		}
+	}
 
 }
