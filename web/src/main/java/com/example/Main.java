@@ -91,7 +91,7 @@ public class Main {
 		VoteEvent event = new VoteEvent();
 		event.value = 9;
 
-		api.createSObject("aazcona__Vote__e", event);
+		api.createSObject("Vote__e", event);
 		return "platformevents";
 	}
 
@@ -108,7 +108,7 @@ public class Main {
 
 	public class VoteEvent {
 
-		@JsonProperty("aazcona__Value__c")
+		@JsonProperty("Value__c")
 		Integer value;
 
 		public Integer getValue() {
