@@ -57,7 +57,7 @@ public class Main {
   String db(Map<String, Object> model) {
     try (Connection connection = dataSource.getConnection()) {
       Statement stmt = connection.createStatement();
-      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timestps (timestp timestamp PRIMARY KEY)");
+      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS timestps (timestp timestamp, id BIGSERIAL PRIMARY KEY)");
       stmt.executeUpdate("INSERT INTO timestps VALUES (now())");
       ResultSet rs = stmt.executeQuery("SELECT timestp FROM timestps");
 
